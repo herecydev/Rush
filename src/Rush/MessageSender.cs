@@ -20,14 +20,27 @@ namespace Rush
 		public Task SendAsync<T>(T message)
 		{
 			if (_messageSenderOptions.Value.StreamSelector == StreamSelector.Single)
-				return _messageStreams.First(stream => stream.Operational).SendAsync(message);
+			{
+				var operationalStream = _messageStreams.FirstOrDefault(stream => stream.Operational);
 
-			var sendTasks = new List<Task>();
+				if (operationalStream == null)
+					throw new InvalidOperationException("There are no operational message streams.");
 
-			foreach (var stream in _messageStreams.Where(stream => stream.Operational))
-				sendTasks.Add(stream.SendAsync(message));
+				return operationalStream.SendAsync(message);
+			}
+			else
+			{
+				var operationalStreams = _messageStreams.Where(stream => stream.Operational);
+				if (!operationalStreams.Any())
+					throw new InvalidOperationException("There are no operational message streams.");
 
-			return Task.WhenAll(sendTasks);
+				var sendTasks = new List<Task>();
+
+				foreach (var stream in operationalStreams)
+					sendTasks.Add(stream.SendAsync(message));
+
+				return Task.WhenAll(sendTasks);
+			}
 		}
 
 		public Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request)

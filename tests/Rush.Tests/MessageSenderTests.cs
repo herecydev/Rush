@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.OptionsModel;
 using Moq;
+using System;
 using System.Threading.Tasks;
 using TestAttributes;
 
@@ -107,5 +108,56 @@ namespace Rush.Tests
 				}
 			}
 		}
-    }
+
+		public class GivenMultipleStreamsAndNoneAreOperational
+		{
+			protected readonly Mock<IMessageStream> _inoperativeStream;
+			protected const string _message = "Hello world!";
+			protected readonly Mock<IMessageStream> _alternativeInoperativeStream;
+			protected readonly Mock<IOptions<MessageSenderOptions>> _options;
+			protected readonly MessageSender _messageSender;
+
+			public GivenMultipleStreamsAndNoneAreOperational()
+			{
+				_inoperativeStream = new Mock<IMessageStream>();
+				_inoperativeStream.Setup(x => x.Operational).Returns(false);
+				_alternativeInoperativeStream = new Mock<IMessageStream>();
+				_alternativeInoperativeStream.Setup(x => x.Operational).Returns(false);
+				var streams = new[] { _inoperativeStream.Object, _alternativeInoperativeStream.Object };
+				_options = new Mock<IOptions<MessageSenderOptions>>();
+
+				_messageSender = new MessageSender(streams, _options.Object);
+			}
+
+			public class WhenSendingToAllStreams : GivenMultipleStreamsAndNoneAreOperational
+			{
+				[Unit]
+				public void ThenOperationalStreamsSendMessage()
+				{
+					_options.Setup(x => x.Value).Returns(new MessageSenderOptions { StreamSelector = StreamSelector.All });
+
+					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
+
+					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message streams.");
+					_inoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
+					_alternativeInoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
+				}
+			}
+
+			public class WhenSendingToSingleStream : GivenMultipleStreamsAndNoneAreOperational
+			{
+				[Unit]
+				public void ThenOperationalStreamsSendMessage()
+				{
+					_options.Setup(x => x.Value).Returns(new MessageSenderOptions { StreamSelector = StreamSelector.Single });
+
+					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
+
+					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message streams.");
+					_inoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
+					_alternativeInoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
+				}
+			}
+		}
+	}
 }
