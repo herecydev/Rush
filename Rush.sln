@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Rush", "src\Rush\Rush.xproj", "{C4DF45BB-9426-49CF-93BE-6941942A1B97}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3E0E2161-7D0D-4C10-BA79-F80620CB5EDB}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Rush.Tests", "tests\Rush.Tests\Rush.Tests.xproj", "{FF133A4A-9815-40D6-B2D7-4F8A69745236}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +26,16 @@ Global
 		{C4DF45BB-9426-49CF-93BE-6941942A1B97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4DF45BB-9426-49CF-93BE-6941942A1B97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4DF45BB-9426-49CF-93BE-6941942A1B97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF133A4A-9815-40D6-B2D7-4F8A69745236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF133A4A-9815-40D6-B2D7-4F8A69745236}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF133A4A-9815-40D6-B2D7-4F8A69745236}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF133A4A-9815-40D6-B2D7-4F8A69745236}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C4DF45BB-9426-49CF-93BE-6941942A1B97} = {589EADAF-9B0D-4E65-A5A6-B189CCB65580}
+		{FF133A4A-9815-40D6-B2D7-4F8A69745236} = {3E0E2161-7D0D-4C10-BA79-F80620CB5EDB}
 	EndGlobalSection
 EndGlobal

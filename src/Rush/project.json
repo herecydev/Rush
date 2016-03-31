@@ -1,10 +1,13 @@
 ﻿{
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Rush Core Library",
   "authors": [ "Dan Kirkham" ],
   "tags": [ "Messaging", "Failover" ],
   "projectUrl": "https://github.com/herecydev/Rush",
   "licenseUrl": "https://raw.githubusercontent.com/herecydev/Rush/master/LICENSE",
+  "dependencies": {
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final"
+  },
   "frameworks": {
     "net451": { },
     "dotnet5.4": {
