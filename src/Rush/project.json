@@ -6,7 +6,8 @@
   "projectUrl": "https://github.com/herecydev/Rush",
   "licenseUrl": "https://raw.githubusercontent.com/herecydev/Rush/master/LICENSE",
   "dependencies": {
-    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final"
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.OptionsModel": "1.0.0-rc1-final",
   },
   "frameworks": {
     "net451": { },

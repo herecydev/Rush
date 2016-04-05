@@ -2,9 +2,9 @@
 
 namespace Rush
 {
-    public interface ISendMessages
+    public interface ISendMessages<T>
     {
-		Task SendAsync<T>(T message);
-		Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request);
+		Task SendAsync(T message);
+		Task<TResponse> SendAsync<TResponse>(T request);
     }
 }
