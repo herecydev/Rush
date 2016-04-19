@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rush
 {
-	public class MessageSender<T> : ISendMessages<T>
+	internal class MessageSender : IMessageStream
 	{
-		private readonly IEnumerable<IMessageStream> _messageStreams;
+		private readonly IProvideMappings _mappingDictionary;
 
-		public MessageSender(IEnumerable<IMessageStream> messageStreams)
+		public MessageSender(IProvideMappings mappingDictionary)
 		{
-			_messageStreams = messageStreams;
+			_mappingDictionary = mappingDictionary;
 		}
 
-		public async Task SendAsync(T message)
+		public async Task SendAsync<T>(T message)
 		{
-			var operationalStream = _messageStreams.FirstOrDefault(stream => stream.Operational);
+			var channels = _mappingDictionary.GetSendingChannels<T>();
+			var operationalStream = channels.FirstOrDefault(stream => stream.Operational);
 
 			if (operationalStream == null)
 				throw new InvalidOperationException("There are no operational message streams.");
@@ -29,11 +29,6 @@ namespace Rush
 			{
 				await SendAsync(message);
 			}
-		}
-
-		public Task<TResponse> SendAsync<TResponse>(T request)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

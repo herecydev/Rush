@@ -8,25 +8,30 @@ namespace Rush.Tests
 {
 	public class MessageSenderTests
     {
+		public static Task CompletedTask = Task.FromResult(false);
+
 		public class GivenMultipleStreamsAndAllAreOperational
 		{
 			protected const string _message = "Hello world!";
-			protected readonly Mock<IMessageStream> _firstStream;
-			protected readonly Mock<IMessageStream> _secondStream;
-			private readonly Mock<IMessageStream> _thirdStream;
-			protected readonly MessageSender<string> _messageSender;
+			protected readonly Mock<ISendingChannel> _firstStream;
+			protected readonly Mock<ISendingChannel> _secondStream;
+			protected readonly Mock<ISendingChannel> _thirdStream;
+			private readonly MessageSender _messageSender;
+			private readonly Mock<IProvideMappings> _mappingProvider;
 
 			public GivenMultipleStreamsAndAllAreOperational()
 			{
-				_firstStream = new Mock<IMessageStream>();
+				_firstStream = new Mock<ISendingChannel>();
 				_firstStream.Setup(x => x.Operational).Returns(true);
-				_secondStream = new Mock<IMessageStream>();
+				_secondStream = new Mock<ISendingChannel>();
 				_secondStream.Setup(x => x.Operational).Returns(true);
-				_thirdStream = new Mock<IMessageStream>();
+				_thirdStream = new Mock<ISendingChannel>();
 				_thirdStream.Setup(x => x.Operational).Returns(true);
 				var streams = new[] { _firstStream.Object, _secondStream.Object, _thirdStream.Object };
+				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender<string>(streams);
+				_messageSender = new MessageSender(_mappingProvider.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndAllAreOperational
@@ -35,9 +40,9 @@ namespace Rush.Tests
 				public async Task ThenSingleStreamSendsMessage()
 				{
 					var count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message)).Returns(Task.FromResult(false)).Callback(() => count++);
-					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(Task.FromResult(false)).Callback(() => count++);
-					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(Task.FromResult(false)).Callback(() => count++);
+					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => count++);
+					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
 
 					await _messageSender.SendAsync(_message);
 
@@ -51,9 +56,9 @@ namespace Rush.Tests
 				public async Task ThenSendsToNextOperationalStream()
 				{
 					var count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message)).Returns(Task.FromResult(false)).Callback(() => count++);
-					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(Task.FromResult(false)).Callback(() => count++);
-					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(Task.FromResult(false)).Callback(() => count++);
+					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => count++);
+					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
 
 					await _messageSender.SendAsync(_message);
 
@@ -64,20 +69,23 @@ namespace Rush.Tests
 
 		public class GivenMultipleStreamsAndSomeAreOperational
 		{
-			protected readonly Mock<IMessageStream> _inoperativeStream;
+			protected readonly Mock<ISendingChannel> _inoperativeStream;
 			protected const string _message = "Hello world!";
-			protected readonly Mock<IMessageStream> _operationalStream;
-			protected readonly MessageSender<string> _messageSender;
+			protected readonly Mock<ISendingChannel> _operationalStream;
+			private readonly MessageSender _messageSender;
+			private readonly Mock<IProvideMappings> _mappingProvider;
 
 			public GivenMultipleStreamsAndSomeAreOperational()
 			{
-				_inoperativeStream = new Mock<IMessageStream>();
+				_inoperativeStream = new Mock<ISendingChannel>();
 				_inoperativeStream.Setup(x => x.Operational).Returns(false);
-				_operationalStream = new Mock<IMessageStream>();
+				_operationalStream = new Mock<ISendingChannel>();
 				_operationalStream.Setup(x => x.Operational).Returns(true);
 				var streams = new[] { _inoperativeStream.Object, _operationalStream.Object };
+				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender<string>(streams);
+				_messageSender = new MessageSender(_mappingProvider.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndSomeAreOperational
@@ -95,20 +103,23 @@ namespace Rush.Tests
 
 		public class GivenMultipleStreamsAndNoneAreOperational
 		{
-			protected readonly Mock<IMessageStream> _inoperativeStream;
+			protected readonly Mock<ISendingChannel> _inoperativeStream;
 			protected const string _message = "Hello world!";
-			protected readonly Mock<IMessageStream> _alternativeInoperativeStream;
-			protected readonly MessageSender<string> _messageSender;
+			protected readonly Mock<ISendingChannel> _alternativeInoperativeStream;
+			private readonly MessageSender _messageSender;
+			private readonly Mock<IProvideMappings> _mappingProvider;
 
 			public GivenMultipleStreamsAndNoneAreOperational()
 			{
-				_inoperativeStream = new Mock<IMessageStream>();
+				_inoperativeStream = new Mock<ISendingChannel>();
 				_inoperativeStream.Setup(x => x.Operational).Returns(false);
-				_alternativeInoperativeStream = new Mock<IMessageStream>();
+				_alternativeInoperativeStream = new Mock<ISendingChannel>();
 				_alternativeInoperativeStream.Setup(x => x.Operational).Returns(false);
 				var streams = new[] { _inoperativeStream.Object, _alternativeInoperativeStream.Object };
+				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender<string>(streams);
+				_messageSender = new MessageSender(_mappingProvider.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndNoneAreOperational
