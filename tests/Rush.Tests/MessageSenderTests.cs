@@ -13,34 +13,34 @@ namespace Rush.Tests
 		private static Task CompletedTask = Task.FromResult(false);
 		private const string _message = "Hello world!";
 
-		public class GivenMultipleStreamsAndAllAreOperational
+		public class GivenMultipleChannelsAndAllAreOperational
 		{
 			
-			private readonly Mock<ISendingChannel> _firstStream;
-			private readonly Mock<ISendingChannel> _secondStream;
-			private readonly Mock<ISendingChannel> _thirdStream;
+			private readonly Mock<ISendingChannel> _firstChannel;
+			private readonly Mock<ISendingChannel> _secondChannel;
+			private readonly Mock<ISendingChannel> _thirdChannel;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
-			public GivenMultipleStreamsAndAllAreOperational()
+			public GivenMultipleChannelsAndAllAreOperational()
 			{
-				_firstStream = new Mock<ISendingChannel>();
-				_firstStream.Setup(x => x.Operational).Returns(true);
-				_secondStream = new Mock<ISendingChannel>();
-				_secondStream.Setup(x => x.Operational).Returns(true);
-				_thirdStream = new Mock<ISendingChannel>();
-				_thirdStream.Setup(x => x.Operational).Returns(true);
-				var streams = new[] { _firstStream.Object, _secondStream.Object, _thirdStream.Object };
+				_firstChannel = new Mock<ISendingChannel>();
+				_firstChannel.Setup(x => x.Operational).Returns(true);
+				_secondChannel = new Mock<ISendingChannel>();
+				_secondChannel.Setup(x => x.Operational).Returns(true);
+				_thirdChannel = new Mock<ISendingChannel>();
+				_thirdChannel.Setup(x => x.Operational).Returns(true);
+				var channels = new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object };
 				_mappingProvider = new Mock<IProvideMappings>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
 
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleStream : GivenMultipleStreamsAndAllAreOperational
+			public class WhenSendingToSingleChannel : GivenMultipleChannelsAndAllAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()
@@ -51,12 +51,12 @@ namespace Rush.Tests
 				}
 
 				[Unit]
-				public async Task ThenSingleStreamSendsMessage()
+				public async Task ThenSingleChannelSendsMessage()
 				{
 					var count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
-					_secondStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
-					_thirdStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_firstChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
+					_secondChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_thirdChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
 
 					await _messageSender.SendAsync(_message);
 
@@ -64,16 +64,16 @@ namespace Rush.Tests
 				}
 			}
 
-			public class WhenSendingToSingleStreamWhichFaults : GivenMultipleStreamsAndAllAreOperational
+			public class WhenSendingToSingleChannelWhichFaults : GivenMultipleChannelsAndAllAreOperational
 			{
 				private int _count;
 
-				public WhenSendingToSingleStreamWhichFaults()
+				public WhenSendingToSingleChannelWhichFaults()
 				{
 					_count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => { _count++; _firstStream.Setup(x => x.Operational).Returns(false); throw new Exception(); });
-					_secondStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
-					_thirdStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
+					_firstChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => { _count++; _firstChannel.Setup(x => x.Operational).Returns(false); throw new Exception(); });
+					_secondChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
+					_thirdChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
 				}
 
 				[Unit]
@@ -93,7 +93,7 @@ namespace Rush.Tests
 				}
 
 				[Unit]
-				public async Task ThenSendsToNextOperationalStream()
+				public async Task ThenSendsToNextOperationalChannel()
 				{
 					await _messageSender.SendAsync(_message);
 
@@ -102,30 +102,30 @@ namespace Rush.Tests
 			}
 		}
 
-		public class GivenMultipleStreamsAndSomeAreOperational
+		public class GivenMultipleChannelsAndSomeAreOperational
 		{
-			private readonly Mock<ISendingChannel> _inoperativeStream;
-			private readonly Mock<ISendingChannel> _operationalStream;
+			private readonly Mock<ISendingChannel> _inoperativeChannel;
+			private readonly Mock<ISendingChannel> _operationalChannel;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
-			public GivenMultipleStreamsAndSomeAreOperational()
+			public GivenMultipleChannelsAndSomeAreOperational()
 			{
-				_inoperativeStream = new Mock<ISendingChannel>();
-				_inoperativeStream.Setup(x => x.Operational).Returns(false);
-				_operationalStream = new Mock<ISendingChannel>();
-				_operationalStream.Setup(x => x.Operational).Returns(true);
-				var streams = new[] { _inoperativeStream.Object, _operationalStream.Object };
+				_inoperativeChannel = new Mock<ISendingChannel>();
+				_inoperativeChannel.Setup(x => x.Operational).Returns(false);
+				_operationalChannel = new Mock<ISendingChannel>();
+				_operationalChannel.Setup(x => x.Operational).Returns(true);
+				var channels = new[] { _inoperativeChannel.Object, _operationalChannel.Object };
 				_mappingProvider = new Mock<IProvideMappings>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
 
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleStream : GivenMultipleStreamsAndSomeAreOperational
+			public class WhenSendingToSingleChannel : GivenMultipleChannelsAndSomeAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()
@@ -136,40 +136,40 @@ namespace Rush.Tests
 				}
 
 				[Unit]
-				public async Task ThenOperationalStreamsSendMessage()
+				public async Task ThenOperationalChannelsSendMessage()
 				{
 					await _messageSender.SendAsync(_message);
 
-					_inoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
-					_operationalStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Once);
+					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_operationalChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Once);
 				}
 			}
 		}
 
-		public class GivenMultipleStreamsAndNoneAreOperational
+		public class GivenMultipleChannelsAndNoneAreOperational
 		{
-			private readonly Mock<ISendingChannel> _inoperativeStream;
-			private readonly Mock<ISendingChannel> _alternativeInoperativeStream;
+			private readonly Mock<ISendingChannel> _inoperativeChannel;
+			private readonly Mock<ISendingChannel> _alternativeInoperativeChannel;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
-			public GivenMultipleStreamsAndNoneAreOperational()
+			public GivenMultipleChannelsAndNoneAreOperational()
 			{
-				_inoperativeStream = new Mock<ISendingChannel>();
-				_inoperativeStream.Setup(x => x.Operational).Returns(false);
-				_alternativeInoperativeStream = new Mock<ISendingChannel>();
-				_alternativeInoperativeStream.Setup(x => x.Operational).Returns(false);
-				var streams = new[] { _inoperativeStream.Object, _alternativeInoperativeStream.Object };
+				_inoperativeChannel = new Mock<ISendingChannel>();
+				_inoperativeChannel.Setup(x => x.Operational).Returns(false);
+				_alternativeInoperativeChannel = new Mock<ISendingChannel>();
+				_alternativeInoperativeChannel.Setup(x => x.Operational).Returns(false);
+				var channels = new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object };
 				_mappingProvider = new Mock<IProvideMappings>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
+				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
 
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleStream : GivenMultipleStreamsAndNoneAreOperational
+			public class WhenSendingToSingleChannel: GivenMultipleChannelsAndNoneAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()
@@ -184,9 +184,9 @@ namespace Rush.Tests
 				{
 					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
 
-					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message streams.");
-					_inoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
-					_alternativeInoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message channels.");
+					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_alternativeInoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
 				}
 			}
 		}
