@@ -7,3 +7,4 @@ Messaging library for .NET
 - [ ] "Demultiplexing" a message onto 1 or more streams
 - [ ] Azure message stream
 - [ ] Logging/visibility
+- [ ] CancellationToken capabilities
