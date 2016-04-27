@@ -28,18 +28,18 @@ namespace Rush
 		private async Task Send<T>(T message, CancellationToken cancellationToken)
 		{
 			var channels = _mappingDictionary.GetSendingChannels<T>();
-			var operationalStream = channels.FirstOrDefault(stream => stream.Operational);
+			var operationalChannel = channels.FirstOrDefault(stream => stream.Operational);
 
-			if (operationalStream == null)
-				throw new InvalidOperationException("There are no operational message streams.");
+			if (operationalChannel == null)
+				throw new InvalidOperationException("There are no operational message channels.");
 
 			try
 			{
-				await operationalStream.SendAsync(message, cancellationToken);
+				await operationalChannel.SendAsync(message, cancellationToken);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogWarning($"Operational stream faulted when sending message of type {typeof(T)}.", ex);
+				_logger.LogWarning($"Operational channel faulted when sending message of type {typeof(T)}.", ex);
 				await Send(message, cancellationToken);
 			}
 		}
