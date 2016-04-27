@@ -14,11 +14,6 @@ namespace Rush
 			_defaultMessageStreams = defaultMessageStreams;
 		}
 
-		public IEnumerable<ISendingChannel> GetSendingChannels<T>()
-		{
-			var streams = _mappings.SingleOrDefault(mapping => mapping.Type == typeof(T))?.Streams;
-
-			return streams ?? _defaultMessageStreams;
-		}
+		public IEnumerable<ISendingChannel> GetSendingChannels<T>() => _mappings.SingleOrDefault(mapping => mapping.Type == typeof(T))?.Streams ?? _defaultMessageStreams;
     }
 }

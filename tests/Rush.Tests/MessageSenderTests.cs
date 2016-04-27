@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Threading.Tasks;
@@ -8,16 +9,18 @@ namespace Rush.Tests
 {
 	public class MessageSenderTests
     {
-		public static Task CompletedTask = Task.FromResult(false);
+		private static Task CompletedTask = Task.FromResult(false);
+		private const string _message = "Hello world!";
 
 		public class GivenMultipleStreamsAndAllAreOperational
 		{
-			protected const string _message = "Hello world!";
-			protected readonly Mock<ISendingChannel> _firstStream;
-			protected readonly Mock<ISendingChannel> _secondStream;
-			protected readonly Mock<ISendingChannel> _thirdStream;
+			
+			private readonly Mock<ISendingChannel> _firstStream;
+			private readonly Mock<ISendingChannel> _secondStream;
+			private readonly Mock<ISendingChannel> _thirdStream;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleStreamsAndAllAreOperational()
 			{
@@ -31,11 +34,21 @@ namespace Rush.Tests
 				_mappingProvider = new Mock<IProvideMappings>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender(_mappingProvider.Object);
+				_logger = new Mock<ILogger<MessageSender>>();
+
+				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndAllAreOperational
 			{
+				[Unit]
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
 				[Unit]
 				public async Task ThenSingleStreamSendsMessage()
 				{
@@ -52,28 +65,49 @@ namespace Rush.Tests
 
 			public class WhenSendingToSingleStreamWhichFaults : GivenMultipleStreamsAndAllAreOperational
 			{
+				private int _count;
+
+				public WhenSendingToSingleStreamWhichFaults()
+				{
+					_count = 0;
+					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => { _count++; _firstStream.Setup(x => x.Operational).Returns(false); throw new Exception(); });
+					_secondStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => _count++);
+					_thirdStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => _count++);
+				}
+
+				[Unit]
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
+				[Unit]
+				public async Task ThenLogsWarning()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_logger.VerifyLoggedWarning(Times.Once());
+				}
+
 				[Unit]
 				public async Task ThenSendsToNextOperationalStream()
 				{
-					var count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => count++);
-					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
-					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
-
 					await _messageSender.SendAsync(_message);
 
-					count.Should().Be(1);
+					_count.Should().Be(2);
 				}
 			}
 		}
 
 		public class GivenMultipleStreamsAndSomeAreOperational
 		{
-			protected readonly Mock<ISendingChannel> _inoperativeStream;
-			protected const string _message = "Hello world!";
-			protected readonly Mock<ISendingChannel> _operationalStream;
+			private readonly Mock<ISendingChannel> _inoperativeStream;
+			private readonly Mock<ISendingChannel> _operationalStream;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleStreamsAndSomeAreOperational()
 			{
@@ -85,11 +119,21 @@ namespace Rush.Tests
 				_mappingProvider = new Mock<IProvideMappings>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender(_mappingProvider.Object);
+				_logger = new Mock<ILogger<MessageSender>>();
+
+				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndSomeAreOperational
 			{
+				[Unit]
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
 				[Unit]
 				public async Task ThenOperationalStreamsSendMessage()
 				{
@@ -103,11 +147,11 @@ namespace Rush.Tests
 
 		public class GivenMultipleStreamsAndNoneAreOperational
 		{
-			protected readonly Mock<ISendingChannel> _inoperativeStream;
-			protected const string _message = "Hello world!";
-			protected readonly Mock<ISendingChannel> _alternativeInoperativeStream;
+			private readonly Mock<ISendingChannel> _inoperativeStream;
+			private readonly Mock<ISendingChannel> _alternativeInoperativeStream;
 			private readonly MessageSender _messageSender;
 			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleStreamsAndNoneAreOperational()
 			{
@@ -119,13 +163,23 @@ namespace Rush.Tests
 				_mappingProvider = new Mock<IProvideMappings>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(streams);
 
-				_messageSender = new MessageSender(_mappingProvider.Object);
+				_logger = new Mock<ILogger<MessageSender>>();
+
+				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
 			public class WhenSendingToSingleStream : GivenMultipleStreamsAndNoneAreOperational
 			{
 				[Unit]
-				public void ThenOperationalStreamsSendMessage()
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message).ContinueWith(t => { });
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
+				[Unit]
+				public void ThenThrowsException()
 				{
 					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
 

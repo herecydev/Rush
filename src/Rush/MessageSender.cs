@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,13 +8,21 @@ namespace Rush
 	internal class MessageSender : IMessageStream
 	{
 		private readonly IProvideMappings _mappingDictionary;
+		private readonly ILogger<MessageSender> _logger;
 
-		public MessageSender(IProvideMappings mappingDictionary)
+		public MessageSender(IProvideMappings mappingDictionary, ILogger<MessageSender> logger)
 		{
 			_mappingDictionary = mappingDictionary;
+			_logger = logger;
 		}
 
-		public async Task SendAsync<T>(T message)
+		public Task SendAsync<T>(T message)
+		{
+			_logger.LogInformation($"Sending message of type {typeof(T)}.");
+			return Send(message);
+		}
+
+		private async Task Send<T>(T message)
 		{
 			var channels = _mappingDictionary.GetSendingChannels<T>();
 			var operationalStream = channels.FirstOrDefault(stream => stream.Operational);
@@ -25,9 +34,10 @@ namespace Rush
 			{
 				await operationalStream.SendAsync(message);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				await SendAsync(message);
+				_logger.LogWarning($"Operational stream faulted sending message of type {typeof(T)}", ex);
+				await Send(message);
 			}
 		}
 	}
