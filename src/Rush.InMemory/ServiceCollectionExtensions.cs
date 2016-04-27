@@ -6,7 +6,7 @@ namespace Rush.InMemory
     {
 		public static IServiceCollection AddRushInMemory(this IServiceCollection services)
 		{
-			services.AddTransient<IMessageStream, BufferBlockStream>();
+			services.AddTransient<ISendingChannel, BufferBlockChannel>();
 
 			return services;
 		}

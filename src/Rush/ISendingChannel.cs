@@ -1,10 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Rush
 {
 	public interface ISendingChannel
 	{
 		bool Operational { get; }
-		Task SendAsync<T>(T message);
+		Task SendAsync<T>(T message, CancellationToken cancellationToken);
 	}
 }

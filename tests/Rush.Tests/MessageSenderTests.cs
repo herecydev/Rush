@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using TestAttributes;
 
@@ -53,9 +54,9 @@ namespace Rush.Tests
 				public async Task ThenSingleStreamSendsMessage()
 				{
 					var count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => count++);
-					_secondStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
-					_thirdStream.Setup(x => x.SendAsync(_message)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_firstStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
+					_secondStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_thirdStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
 
 					await _messageSender.SendAsync(_message);
 
@@ -70,9 +71,9 @@ namespace Rush.Tests
 				public WhenSendingToSingleStreamWhichFaults()
 				{
 					_count = 0;
-					_firstStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => { _count++; _firstStream.Setup(x => x.Operational).Returns(false); throw new Exception(); });
-					_secondStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => _count++);
-					_thirdStream.Setup(x => x.SendAsync(_message)).Returns(CompletedTask).Callback(() => _count++);
+					_firstStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => { _count++; _firstStream.Setup(x => x.Operational).Returns(false); throw new Exception(); });
+					_secondStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
+					_thirdStream.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => _count++);
 				}
 
 				[Unit]
@@ -139,8 +140,8 @@ namespace Rush.Tests
 				{
 					await _messageSender.SendAsync(_message);
 
-					_inoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
-					_operationalStream.Verify(x => x.SendAsync(_message), Times.Once);
+					_inoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_operationalStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Once);
 				}
 			}
 		}
@@ -184,8 +185,8 @@ namespace Rush.Tests
 					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
 
 					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message streams.");
-					_inoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
-					_alternativeInoperativeStream.Verify(x => x.SendAsync(_message), Times.Never);
+					_inoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_alternativeInoperativeStream.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
 				}
 			}
 		}

@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace Rush
 {
@@ -16,13 +17,15 @@ namespace Rush
 			_logger = logger;
 		}
 
-		public Task SendAsync<T>(T message)
+		public Task SendAsync<T>(T message) => SendAsync(message, CancellationToken.None);
+
+		public Task SendAsync<T>(T message, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation($"Sending message of type {typeof(T)}.");
-			return Send(message);
+			return Send(message, cancellationToken);
 		}
 
-		private async Task Send<T>(T message)
+		private async Task Send<T>(T message, CancellationToken cancellationToken)
 		{
 			var channels = _mappingDictionary.GetSendingChannels<T>();
 			var operationalStream = channels.FirstOrDefault(stream => stream.Operational);
@@ -32,12 +35,12 @@ namespace Rush
 
 			try
 			{
-				await operationalStream.SendAsync(message);
+				await operationalStream.SendAsync(message, cancellationToken);
 			}
 			catch (Exception ex)
 			{
-				_logger.LogWarning($"Operational stream faulted sending message of type {typeof(T)}", ex);
-				await Send(message);
+				_logger.LogWarning($"Operational stream faulted when sending message of type {typeof(T)}.", ex);
+				await Send(message, cancellationToken);
 			}
 		}
 	}
