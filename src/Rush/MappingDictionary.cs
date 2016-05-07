@@ -3,17 +3,17 @@ using System.Linq;
 
 namespace Rush
 {
-	internal class MappingDictionary : IProvideMappings
+	internal class MappingDictionary : IMappingDictionary
     {
-		private readonly IEnumerable<ISenderMessageStreamMapping> _mappings;
-		private readonly IEnumerable<ISendingChannel> _defaultMessageStreams;
+		private readonly IEnumerable<ISendingChannelMapping> _sendingMappings;
+		private readonly IEnumerable<ISendingChannel> _defaultChannels;
 
-		public MappingDictionary(IEnumerable<ISenderMessageStreamMapping> mappings, IEnumerable<ISendingChannel> defaultMessageStreams)
+		public MappingDictionary(IEnumerable<ISendingChannelMapping> sendingMappings, IEnumerable<ISendingChannel> defaultChannels)
 		{
-			_mappings = mappings;
-			_defaultMessageStreams = defaultMessageStreams;
+			_sendingMappings = sendingMappings;
+			_defaultChannels = defaultChannels;
 		}
 
-		public IEnumerable<ISendingChannel> GetSendingChannels<T>() => _mappings.SingleOrDefault(mapping => mapping.Type == typeof(T))?.Streams ?? _defaultMessageStreams;
-    }
+		public IEnumerable<ISendingChannel> GetSendingChannels<T>() => _sendingMappings.SingleOrDefault(mapping => mapping.Type == typeof(T))?.Channels ?? _defaultChannels;
+	}
 }

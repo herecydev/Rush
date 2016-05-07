@@ -4,16 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 
-namespace Rush
+namespace Rush 
 {
 	internal class MessageSender : IMessageStream
 	{
-		private readonly IProvideMappings _mappingDictionary;
+		private readonly IMappingDictionary _mappingProvider;
 		private readonly ILogger<MessageSender> _logger;
 
-		public MessageSender(IProvideMappings mappingDictionary, ILogger<MessageSender> logger)
+		public MessageSender(IMappingDictionary mappingProvider, ILogger<MessageSender> logger)
 		{
-			_mappingDictionary = mappingDictionary;
+			_mappingProvider = mappingProvider;
 			_logger = logger;
 		}
 
@@ -27,7 +27,7 @@ namespace Rush
 
 		private async Task Send<T>(T message, CancellationToken cancellationToken)
 		{
-			var channels = _mappingDictionary.GetSendingChannels<T>();
+			var channels = _mappingProvider.GetSendingChannels<T>();
 			var operationalChannel = channels.FirstOrDefault(stream => stream.Operational);
 
 			if (operationalChannel == null)

@@ -8,16 +8,24 @@ namespace Rush
 		public static IServiceCollection AddRush(this IServiceCollection services)
 		{
 			services.AddTransient<IMessageStream, MessageSender>();
-			services.AddSingleton<IProvideMappings, MappingDictionary>();
+			services.AddTransient(typeof(IReceivingChannel<>), typeof(MessageReceiver<>));
+			services.AddTransient<IMappingDictionary, MappingDictionary>();
 			
 			return services;
 		}
 
-		public static IServiceCollection AddSenderMessageStreams<T>(this IServiceCollection services, IEnumerable<ISendingChannel> messageStreams)
+		public static IServiceCollection AddSenderMessageChannels<T>(this IServiceCollection services, IEnumerable<ISendingChannel> messageChannels)
 		{
-			services.AddInstance<ISenderMessageStreamMapping>(new MessageStreamMapping(typeof(T), messageStreams));
+			services.AddInstance<ISendingChannelMapping>(new MessageChannelMapping(typeof(T), messageChannels));
 
 			return services;
 		}
-    }
+
+		public static IServiceCollection AddReceiverMessageChannels<T>(this IServiceCollection services, IEnumerable<IReceivingChannel<T>> messageChannels)
+		{
+			services.AddInstance(messageChannels);
+
+			return services;
+		}
+	}
 }

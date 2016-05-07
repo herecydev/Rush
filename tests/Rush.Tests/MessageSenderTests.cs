@@ -15,12 +15,11 @@ namespace Rush.Tests
 
 		public class GivenMultipleChannelsAndAllAreOperational
 		{
-			
 			private readonly Mock<ISendingChannel> _firstChannel;
 			private readonly Mock<ISendingChannel> _secondChannel;
 			private readonly Mock<ISendingChannel> _thirdChannel;
 			private readonly MessageSender _messageSender;
-			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<IMappingDictionary> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleChannelsAndAllAreOperational()
@@ -32,7 +31,7 @@ namespace Rush.Tests
 				_thirdChannel = new Mock<ISendingChannel>();
 				_thirdChannel.Setup(x => x.Operational).Returns(true);
 				var channels = new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object };
-				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider = new Mock<IMappingDictionary>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
@@ -40,7 +39,7 @@ namespace Rush.Tests
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleChannel : GivenMultipleChannelsAndAllAreOperational
+			public class WhenSending : GivenMultipleChannelsAndAllAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()
@@ -107,7 +106,7 @@ namespace Rush.Tests
 			private readonly Mock<ISendingChannel> _inoperativeChannel;
 			private readonly Mock<ISendingChannel> _operationalChannel;
 			private readonly MessageSender _messageSender;
-			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<IMappingDictionary> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleChannelsAndSomeAreOperational()
@@ -117,7 +116,7 @@ namespace Rush.Tests
 				_operationalChannel = new Mock<ISendingChannel>();
 				_operationalChannel.Setup(x => x.Operational).Returns(true);
 				var channels = new[] { _inoperativeChannel.Object, _operationalChannel.Object };
-				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider = new Mock<IMappingDictionary>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
@@ -125,7 +124,7 @@ namespace Rush.Tests
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleChannel : GivenMultipleChannelsAndSomeAreOperational
+			public class WhenSending : GivenMultipleChannelsAndSomeAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()
@@ -151,7 +150,7 @@ namespace Rush.Tests
 			private readonly Mock<ISendingChannel> _inoperativeChannel;
 			private readonly Mock<ISendingChannel> _alternativeInoperativeChannel;
 			private readonly MessageSender _messageSender;
-			private readonly Mock<IProvideMappings> _mappingProvider;
+			private readonly Mock<IMappingDictionary> _mappingProvider;
 			private readonly Mock<ILogger<MessageSender>> _logger;
 
 			public GivenMultipleChannelsAndNoneAreOperational()
@@ -161,7 +160,7 @@ namespace Rush.Tests
 				_alternativeInoperativeChannel = new Mock<ISendingChannel>();
 				_alternativeInoperativeChannel.Setup(x => x.Operational).Returns(false);
 				var channels = new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object };
-				_mappingProvider = new Mock<IProvideMappings>();
+				_mappingProvider = new Mock<IMappingDictionary>();
 				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
 				_logger = new Mock<ILogger<MessageSender>>();
@@ -169,7 +168,7 @@ namespace Rush.Tests
 				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
 			}
 
-			public class WhenSendingToSingleChannel: GivenMultipleChannelsAndNoneAreOperational
+			public class WhenSending : GivenMultipleChannelsAndNoneAreOperational
 			{
 				[Unit]
 				public async Task ThenLogsInformation()

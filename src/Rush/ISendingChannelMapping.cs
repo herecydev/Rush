@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Rush
 {
-    public interface ISenderMessageStreamMapping
+    public interface ISendingChannelMapping
     {
 		Type Type { get; }
-		IEnumerable<ISendingChannel> Streams { get; }
+		IEnumerable<ISendingChannel> Channels { get; }
 	}
 }

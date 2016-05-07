@@ -15,10 +15,10 @@ namespace Rush.Tests
 
 			public GivenAMappingForTypeThatExists()
 			{
-				var mapping = new Mock<ISenderMessageStreamMapping>();
+				var mapping = new Mock<ISendingChannelMapping>();
 				_mappingSender = new Mock<ISendingChannel>();
 				mapping.Setup(x => x.Type).Returns(typeof(string));
-				mapping.Setup(x => x.Streams).Returns(new[] { _mappingSender.Object });
+				mapping.Setup(x => x.Channels).Returns(new[] { _mappingSender.Object });
 
 				_defaultSender = new Mock<ISendingChannel>();
 
@@ -47,7 +47,7 @@ namespace Rush.Tests
 			{
 				_defaultSender = new Mock<ISendingChannel>();
 
-				_mappingDictionary = new MappingDictionary(Enumerable.Empty<ISenderMessageStreamMapping>(), new[] { _defaultSender.Object });
+				_mappingDictionary = new MappingDictionary(Enumerable.Empty<ISendingChannelMapping>(), new[] { _defaultSender.Object });
 			}
 
 			public class WhenGettingSendingChannels : GivenAMappingForTypeThatDoesNotExist

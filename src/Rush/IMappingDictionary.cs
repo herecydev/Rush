@@ -2,7 +2,7 @@
 
 namespace Rush
 {
-    public interface IProvideMappings
+    internal interface IMappingDictionary
     {
 		IEnumerable<ISendingChannel> GetSendingChannels<T>();
 	}
