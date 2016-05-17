@@ -7,8 +7,9 @@ namespace Rush
     {
 		public static IServiceCollection AddRush(this IServiceCollection services)
 		{
+			services.AddLogging();
 			services.AddTransient<IMessageStream, MessageSender>();
-			services.AddTransient(typeof(IReceivingChannel<>), typeof(MessageReceiver<>));
+			services.AddTransient(typeof(IReceivingStream<>), typeof(MessageReceiver<>));
 			services.AddTransient<IMappingDictionary, MappingDictionary>();
 			
 			return services;

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Rush.InMemory;
 
-namespace Rush.InMemory
+namespace Rush
 {
     public static class ServiceCollectionExtensions
     {
