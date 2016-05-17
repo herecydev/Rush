@@ -16,14 +16,14 @@ namespace Rush
 
 		public static IServiceCollection AddSenderMessageChannels<T>(this IServiceCollection services, IEnumerable<ISendingChannel> messageChannels)
 		{
-			services.AddInstance<ISendingChannelMapping>(new MessageChannelMapping(typeof(T), messageChannels));
+			services.AddSingleton<ISendingChannelMapping>(new MessageChannelMapping(typeof(T), messageChannels));
 
 			return services;
 		}
 
 		public static IServiceCollection AddReceiverMessageChannels<T>(this IServiceCollection services, IEnumerable<IReceivingChannel<T>> messageChannels)
 		{
-			services.AddInstance(messageChannels);
+			services.AddSingleton(messageChannels);
 
 			return services;
 		}

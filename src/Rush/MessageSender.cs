@@ -35,12 +35,12 @@ namespace Rush
 
 			try
 			{
-				await operationalChannel.SendAsync(message, cancellationToken);
+				await operationalChannel.SendAsync(message, cancellationToken).ConfigureAwait(false);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogWarning($"Operational channel faulted when sending message of type {typeof(T)}.", ex);
-				await Send(message, cancellationToken);
+				await Send(message, cancellationToken).ConfigureAwait(false);
 			}
 		}
 	}
