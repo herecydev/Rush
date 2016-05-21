@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace Rush
 {
-	public interface ISendingChannel
+	public interface ISendingChannel<T>
 	{
 		bool Operational { get; }
-		Task SendAsync<T>(T message, CancellationToken cancellationToken);
+		Task SendAsync(T message, CancellationToken cancellationToken);
 	}
 }

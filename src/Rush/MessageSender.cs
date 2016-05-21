@@ -3,32 +3,32 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace Rush 
 {
-	internal class MessageSender : IMessageStream
+	internal class MessageSender<T> : IMessageStream<T>
 	{
-		private readonly IMappingDictionary _mappingProvider;
-		private readonly ILogger<MessageSender> _logger;
+		private readonly IEnumerable<ISendingChannel<T>> _channels;
+		private readonly ILogger<MessageSender<T>> _logger;
 
-		public MessageSender(IMappingDictionary mappingProvider, ILogger<MessageSender> logger)
+		public MessageSender(IEnumerable<ISendingChannel<T>> channels, ILogger<MessageSender<T>> logger)
 		{
-			_mappingProvider = mappingProvider;
+			_channels = channels;
 			_logger = logger;
 		}
 
-		public Task SendAsync<T>(T message) => SendAsync(message, CancellationToken.None);
+		public Task SendAsync(T message) => SendAsync(message, CancellationToken.None);
 
-		public Task SendAsync<T>(T message, CancellationToken cancellationToken)
+		public Task SendAsync(T message, CancellationToken cancellationToken)
 		{
 			_logger.LogInformation($"Sending message of type {typeof(T)}.");
 			return Send(message, cancellationToken);
 		}
 
-		private async Task Send<T>(T message, CancellationToken cancellationToken)
+		private async Task Send(T message, CancellationToken cancellationToken)
 		{
-			var channels = _mappingProvider.GetSendingChannels<T>();
-			var operationalChannel = channels.FirstOrDefault(stream => stream.Operational);
+			var operationalChannel = _channels.FirstOrDefault(stream => stream.Operational);
 
 			if (operationalChannel == null)
 				throw new InvalidOperationException("There are no operational message channels.");

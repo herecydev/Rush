@@ -3,9 +3,9 @@ using System.Threading.Tasks;
 
 namespace Rush
 {
-	public interface IMessageStream
+	public interface IMessageStream<T>
 	{
-		Task SendAsync<T>(T message);
-		Task SendAsync<T>(T message, CancellationToken cancellationToken);
+		Task SendAsync(T message);
+		Task SendAsync(T message, CancellationToken cancellationToken);
 	}
 }

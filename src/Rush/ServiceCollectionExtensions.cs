@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
 
 namespace Rush
 {
@@ -8,24 +7,9 @@ namespace Rush
 		public static IServiceCollection AddRush(this IServiceCollection services)
 		{
 			services.AddLogging();
-			services.AddTransient<IMessageStream, MessageSender>();
+			services.AddTransient(typeof(IMessageStream<>), typeof(MessageSender<>));
 			services.AddTransient(typeof(IReceivingStream<>), typeof(MessageReceiver<>));
-			services.AddTransient<IMappingDictionary, MappingDictionary>();
 			
-			return services;
-		}
-
-		public static IServiceCollection AddSenderMessageChannels<T>(this IServiceCollection services, IEnumerable<ISendingChannel> messageChannels)
-		{
-			services.AddSingleton<ISendingChannelMapping>(new MessageChannelMapping(typeof(T), messageChannels));
-
-			return services;
-		}
-
-		public static IServiceCollection AddReceiverMessageChannels<T>(this IServiceCollection services, IEnumerable<IReceivingChannel<T>> messageChannels)
-		{
-			services.AddSingleton(messageChannels);
-
 			return services;
 		}
 	}

@@ -4,7 +4,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace Rush.InMemory
 {
-	internal class BufferBlockSendingChannel : ISendingChannel
+	internal class BufferBlockSendingChannel<T> : ISendingChannel<T>
 	{
 		public bool Operational => true;
 		private readonly IBufferBlockDictionary _bufferBlockDictionary;
@@ -14,7 +14,7 @@ namespace Rush.InMemory
 			_bufferBlockDictionary = bufferBlockDictionary;
 		}
 
-		public Task SendAsync<T>(T message, CancellationToken cancellationToken)
+		public Task SendAsync(T message, CancellationToken cancellationToken)
 		{
 			var bufferBlock = _bufferBlockDictionary.GetBufferBlock<T>();
 			return bufferBlock.SendAsync(message, cancellationToken);

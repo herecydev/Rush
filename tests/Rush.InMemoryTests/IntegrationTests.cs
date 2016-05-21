@@ -28,7 +28,7 @@ namespace Rush.InMemoryTests
 				{
 					var receiver = _serviceProvider.GetRequiredService<IReceivingStream<string>>();
 					var semaphore = new SemaphoreSlim(0);
-					var sender = _serviceProvider.GetRequiredService<IMessageStream>();
+					var sender = _serviceProvider.GetRequiredService<IMessageStream<string>>();
 					var observer = new Mock<IObserver<string>>();
 					observer.Setup(x => x.OnNext(It.IsAny<string>())).Callback(() => semaphore.Release());
 					var message = "Hello world!";

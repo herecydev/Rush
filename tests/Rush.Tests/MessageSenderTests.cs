@@ -15,28 +15,24 @@ namespace Rush.Tests
 
 		public class GivenMultipleChannelsAndAllAreOperational
 		{
-			private readonly Mock<ISendingChannel> _firstChannel;
-			private readonly Mock<ISendingChannel> _secondChannel;
-			private readonly Mock<ISendingChannel> _thirdChannel;
-			private readonly MessageSender _messageSender;
-			private readonly Mock<IMappingDictionary> _mappingProvider;
-			private readonly Mock<ILogger<MessageSender>> _logger;
+			private readonly Mock<ISendingChannel<string>> _firstChannel;
+			private readonly Mock<ISendingChannel<string>> _secondChannel;
+			private readonly Mock<ISendingChannel<string>> _thirdChannel;
+			private readonly MessageSender<string> _messageSender;
+			private readonly Mock<ILogger<MessageSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndAllAreOperational()
 			{
-				_firstChannel = new Mock<ISendingChannel>();
+				_firstChannel = new Mock<ISendingChannel<string>>();
 				_firstChannel.Setup(x => x.Operational).Returns(true);
-				_secondChannel = new Mock<ISendingChannel>();
+				_secondChannel = new Mock<ISendingChannel<string>>();
 				_secondChannel.Setup(x => x.Operational).Returns(true);
-				_thirdChannel = new Mock<ISendingChannel>();
+				_thirdChannel = new Mock<ISendingChannel<string>>();
 				_thirdChannel.Setup(x => x.Operational).Returns(true);
-				var channels = new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object };
-				_mappingProvider = new Mock<IMappingDictionary>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
-				_logger = new Mock<ILogger<MessageSender>>();
+				_logger = new Mock<ILogger<MessageSender<string>>>();
 
-				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
+				_messageSender = new MessageSender<string>(new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSending : GivenMultipleChannelsAndAllAreOperational
@@ -103,25 +99,21 @@ namespace Rush.Tests
 
 		public class GivenMultipleChannelsAndSomeAreOperational
 		{
-			private readonly Mock<ISendingChannel> _inoperativeChannel;
-			private readonly Mock<ISendingChannel> _operationalChannel;
-			private readonly MessageSender _messageSender;
-			private readonly Mock<IMappingDictionary> _mappingProvider;
-			private readonly Mock<ILogger<MessageSender>> _logger;
+			private readonly Mock<ISendingChannel<string>> _inoperativeChannel;
+			private readonly Mock<ISendingChannel<string>> _operationalChannel;
+			private readonly MessageSender<string> _messageSender;
+			private readonly Mock<ILogger<MessageSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndSomeAreOperational()
 			{
-				_inoperativeChannel = new Mock<ISendingChannel>();
+				_inoperativeChannel = new Mock<ISendingChannel<string>>();
 				_inoperativeChannel.Setup(x => x.Operational).Returns(false);
-				_operationalChannel = new Mock<ISendingChannel>();
+				_operationalChannel = new Mock<ISendingChannel<string>>();
 				_operationalChannel.Setup(x => x.Operational).Returns(true);
-				var channels = new[] { _inoperativeChannel.Object, _operationalChannel.Object };
-				_mappingProvider = new Mock<IMappingDictionary>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
-				_logger = new Mock<ILogger<MessageSender>>();
+				_logger = new Mock<ILogger<MessageSender<string>>>();
 
-				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
+				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _operationalChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSending : GivenMultipleChannelsAndSomeAreOperational
@@ -147,25 +139,21 @@ namespace Rush.Tests
 
 		public class GivenMultipleChannelsAndNoneAreOperational
 		{
-			private readonly Mock<ISendingChannel> _inoperativeChannel;
-			private readonly Mock<ISendingChannel> _alternativeInoperativeChannel;
-			private readonly MessageSender _messageSender;
-			private readonly Mock<IMappingDictionary> _mappingProvider;
-			private readonly Mock<ILogger<MessageSender>> _logger;
+			private readonly Mock<ISendingChannel<string>> _inoperativeChannel;
+			private readonly Mock<ISendingChannel<string>> _alternativeInoperativeChannel;
+			private readonly MessageSender<string> _messageSender;
+			private readonly Mock<ILogger<MessageSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndNoneAreOperational()
 			{
-				_inoperativeChannel = new Mock<ISendingChannel>();
+				_inoperativeChannel = new Mock<ISendingChannel<string>>();
 				_inoperativeChannel.Setup(x => x.Operational).Returns(false);
-				_alternativeInoperativeChannel = new Mock<ISendingChannel>();
+				_alternativeInoperativeChannel = new Mock<ISendingChannel<string>>();
 				_alternativeInoperativeChannel.Setup(x => x.Operational).Returns(false);
-				var channels = new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object };
-				_mappingProvider = new Mock<IMappingDictionary>();
-				_mappingProvider.Setup(x => x.GetSendingChannels<string>()).Returns(channels);
 
-				_logger = new Mock<ILogger<MessageSender>>();
+				_logger = new Mock<ILogger<MessageSender<string>>>();
 
-				_messageSender = new MessageSender(_mappingProvider.Object, _logger.Object);
+				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSending : GivenMultipleChannelsAndNoneAreOperational
