@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Rush 
 {
-	internal class MessageSender<T> : IMessageStream<T>
+	internal class MessageSender<T> : ISendingStream<T>
 	{
 		private readonly IEnumerable<ISendingChannel<T>> _channels;
 		private readonly ILogger<MessageSender<T>> _logger;
@@ -22,6 +22,8 @@ namespace Rush
 
 		public Task SendAsync(T message, CancellationToken cancellationToken)
 		{
+			if (message == null) throw new ArgumentNullException(nameof(message));
+
 			_logger.LogInformation($"Sending message of type {typeof(T)}.");
 			return Send(message, cancellationToken);
 		}

@@ -35,6 +35,17 @@ namespace Rush.Tests
 				_messageSender = new MessageSender<string>(new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object }, _logger.Object);
 			}
 
+			public class WhenSendingNullMessage : GivenMultipleChannelsAndAllAreOperational
+			{
+				[Unit]
+				public void ThenThrowsException()
+				{
+					Func<Task> sending = () => _messageSender.SendAsync(null);
+
+					sending.ShouldThrow<ArgumentNullException>();
+				}
+			}
+
 			public class WhenSending : GivenMultipleChannelsAndAllAreOperational
 			{
 				[Unit]
@@ -58,7 +69,7 @@ namespace Rush.Tests
 					count.Should().Be(1);
 				}
 			}
-
+			
 			public class WhenSendingToSingleChannelWhichFaults : GivenMultipleChannelsAndAllAreOperational
 			{
 				private int _count;
@@ -116,6 +127,17 @@ namespace Rush.Tests
 				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _operationalChannel.Object }, _logger.Object);
 			}
 
+			public class WhenSendingNullMessage : GivenMultipleChannelsAndSomeAreOperational
+			{
+				[Unit]
+				public void ThenThrowsException()
+				{
+					Func<Task> sending = () => _messageSender.SendAsync(null);
+
+					sending.ShouldThrow<ArgumentNullException>();
+				}
+			}
+
 			public class WhenSending : GivenMultipleChannelsAndSomeAreOperational
 			{
 				[Unit]
@@ -154,6 +176,17 @@ namespace Rush.Tests
 				_logger = new Mock<ILogger<MessageSender<string>>>();
 
 				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object }, _logger.Object);
+			}
+
+			public class WhenSendingNullMessage : GivenMultipleChannelsAndNoneAreOperational
+			{
+				[Unit]
+				public void ThenThrowsException()
+				{
+					Func<Task> sending = () => _messageSender.SendAsync(null);
+
+					sending.ShouldThrow<ArgumentNullException>();
+				}
 			}
 
 			public class WhenSending : GivenMultipleChannelsAndNoneAreOperational
