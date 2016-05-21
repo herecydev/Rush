@@ -1,2 +1,2 @@
-﻿dotnet test src\Rush
-dotnet test src\Rush.InMemory
+﻿dotnet test tests\Rush.Tests
+dotnet test tests\Rush.InMemoryTests
