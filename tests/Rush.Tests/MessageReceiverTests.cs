@@ -6,7 +6,7 @@ using TestAttributes;
 namespace Rush.Tests
 {
 	public class MessageReceiverTests
-    {
+	{
 		public class GivenMultipleChannels
 		{
 			private readonly Mock<IReceivingChannel<string>> _firstChannel;
@@ -66,5 +66,5 @@ namespace Rush.Tests
 				}
 			}
 		}
-    }
+	}
 }

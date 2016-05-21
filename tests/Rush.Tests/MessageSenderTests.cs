@@ -9,7 +9,7 @@ using TestAttributes;
 namespace Rush.Tests
 {
 	public class MessageSenderTests
-    {
+	{
 		private static Task CompletedTask = Task.FromResult(false);
 		private const string _message = "Hello world!";
 
@@ -69,7 +69,7 @@ namespace Rush.Tests
 					count.Should().Be(1);
 				}
 			}
-			
+
 			public class WhenSendingToSingleChannelWhichFaults : GivenMultipleChannelsAndAllAreOperational
 			{
 				private int _count;

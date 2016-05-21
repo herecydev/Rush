@@ -8,7 +8,7 @@ namespace Rush.InMemoryTests
 	public class InMemoryCollection : ICollectionFixture<InMemoryFixture> { }
 
 	public class InMemoryFixture : IDisposable
-    {
+	{
 		public IServiceProvider ServiceProvider { get; set; }
 
 		public InMemoryFixture()

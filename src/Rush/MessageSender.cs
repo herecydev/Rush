@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Generic;
 
-namespace Rush 
+namespace Rush
 {
 	internal class MessageSender<T> : ISendingStream<T>
 	{

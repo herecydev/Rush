@@ -3,7 +3,7 @@
 namespace Rush.InMemory
 {
 	internal interface IBufferBlockDictionary
-    {
+	{
 		BufferBlock<T> GetBufferBlock<T>();
-    }
+	}
 }

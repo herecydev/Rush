@@ -8,8 +8,8 @@ using Xunit;
 
 namespace Rush.InMemoryTests
 {
-    public class IntegrationTests
-    {
+	public class IntegrationTests
+	{
 		[Collection("InMemory collection")]
 		public class GivenServiceProviderCanResolveSenderAndReceiver
 		{
@@ -42,5 +42,5 @@ namespace Rush.InMemoryTests
 				}
 			}
 		}
-    }
+	}
 }

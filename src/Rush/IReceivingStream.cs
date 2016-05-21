@@ -2,7 +2,7 @@
 
 namespace Rush
 {
-    public interface IReceivingStream<T> : IObservable<T>
-    {
-    }
+	public interface IReceivingStream<T> : IObservable<T>
+	{
+	}
 }
