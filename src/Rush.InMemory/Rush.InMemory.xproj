@@ -6,8 +6,8 @@
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\DNX\Microsoft.DNX.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>c4df45bb-9426-49cf-93be-6941942a1b97</ProjectGuid>
-    <RootNamespace>Rush</RootNamespace>
+    <ProjectGuid>d085fd12-a95b-4751-8d69-3b2ecf572c10</ProjectGuid>
+    <RootNamespace>Rush.InMemory</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">..\..\artifacts\obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
   </PropertyGroup>
