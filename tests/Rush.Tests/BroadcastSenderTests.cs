@@ -161,6 +161,26 @@ namespace Rush.Tests
 				}
 			}
 
+			public class WhenSending : GivenMultipleChannelsAndSomeAreOperational
+			{
+				[Unit]
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
+				[Unit]
+				public async Task ThenOperationalChannelsSendMessage()
+				{
+					await _messageSender.SendAsync(_message);
+
+					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_operationalChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Once);
+				}
+			}
+
 			public class WhenCancellingSend : GivenMultipleChannelsAndSomeAreOperational
 			{
 				[Unit]
@@ -179,26 +199,6 @@ namespace Rush.Tests
 					catch { }
 
 					sending.IsCanceled.Should().BeTrue();
-				}
-			}
-
-			public class WhenSending : GivenMultipleChannelsAndSomeAreOperational
-			{
-				[Unit]
-				public async Task ThenLogsInformation()
-				{
-					await _messageSender.SendAsync(_message);
-
-					_logger.VerifyLoggedInformation(Times.Once());
-				}
-
-				[Unit]
-				public async Task ThenOperationalChannelsSendMessage()
-				{
-					await _messageSender.SendAsync(_message);
-
-					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
-					_operationalChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Once);
 				}
 			}
 		}
@@ -233,6 +233,27 @@ namespace Rush.Tests
 				}
 			}
 
+			public class WhenSending : GivenMultipleChannelsAndNoneAreOperational
+			{
+				[Unit]
+				public async Task ThenLogsInformation()
+				{
+					await _messageSender.SendAsync(_message).ContinueWith(t => { });
+
+					_logger.VerifyLoggedInformation(Times.Once());
+				}
+
+				[Unit]
+				public void ThenThrowsException()
+				{
+					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
+
+					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message channels.");
+					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+					_alternativeInoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
+				}
+			}
+
 			public class WhenCancellingSend : GivenMultipleChannelsAndNoneAreOperational
 			{
 				[Unit]
@@ -252,27 +273,6 @@ namespace Rush.Tests
 					catch { }
 
 					sending.IsFaulted.Should().BeTrue();
-				}
-			}
-
-			public class WhenSending : GivenMultipleChannelsAndNoneAreOperational
-			{
-				[Unit]
-				public async Task ThenLogsInformation()
-				{
-					await _messageSender.SendAsync(_message).ContinueWith(t => { });
-
-					_logger.VerifyLoggedInformation(Times.Once());
-				}
-
-				[Unit]
-				public void ThenThrowsException()
-				{
-					Func<Task> sendTask = () => _messageSender.SendAsync(_message);
-
-					sendTask.ShouldThrow<InvalidOperationException>().And.Message.Should().Be("There are no operational message channels.");
-					_inoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
-					_alternativeInoperativeChannel.Verify(x => x.SendAsync(_message, CancellationToken.None), Times.Never);
 				}
 			}
 		}
