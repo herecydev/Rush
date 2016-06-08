@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 namespace Rush
 {
-	internal class MessageSender<T> : ISendingStream<T>
+	internal class UnicastSender<T> : ISendingStream<T>
 	{
 		private readonly IEnumerable<ISendingChannel<T>> _channels;
-		private readonly ILogger<MessageSender<T>> _logger;
+		private readonly ILogger<UnicastSender<T>> _logger;
 
-		public MessageSender(IEnumerable<ISendingChannel<T>> channels, ILogger<MessageSender<T>> logger)
+		public UnicastSender(IEnumerable<ISendingChannel<T>> channels, ILogger<UnicastSender<T>> logger)
 		{
 			_channels = channels;
 			_logger = logger;
