@@ -8,8 +8,8 @@ using TestAttributes;
 
 namespace Rush.Tests
 {
-    public class BroadcastSenderTests
-    {
+	public class BroadcastSenderTests
+	{
 		private static Task CompletedTask = Task.FromResult(false);
 		private const string _message = "Hello world!";
 
@@ -106,6 +106,29 @@ namespace Rush.Tests
 					_count.Should().Be(3);
 				}
 			}
+
+			public class WhenCancellingSend : GivenMultipleChannelsAndAllAreOperational
+			{
+				[Unit]
+				public async Task ThenTaskIsCancelled()
+				{
+					var cts = new CancellationTokenSource();
+					_firstChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+					_secondChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+					_thirdChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+
+					var sending = _messageSender.SendAsync(_message, cts.Token);
+					cts.Cancel();
+
+					try
+					{
+						await sending;
+					}
+					catch { }
+
+					sending.IsCanceled.Should().BeTrue();
+				}
+			}
 		}
 
 		public class GivenMultipleChannelsAndSomeAreOperational
@@ -135,6 +158,27 @@ namespace Rush.Tests
 					Func<Task> sending = () => _messageSender.SendAsync(null);
 
 					sending.ShouldThrow<ArgumentNullException>();
+				}
+			}
+
+			public class WhenCancellingSend : GivenMultipleChannelsAndSomeAreOperational
+			{
+				[Unit]
+				public async Task ThenTaskIsCancelled()
+				{
+					var cts = new CancellationTokenSource();
+					_operationalChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+
+					var sending = _messageSender.SendAsync(_message, cts.Token);
+					cts.Cancel();
+
+					try
+					{
+						await sending;
+					}
+					catch { }
+
+					sending.IsCanceled.Should().BeTrue();
 				}
 			}
 
@@ -186,6 +230,28 @@ namespace Rush.Tests
 					Func<Task> sending = () => _messageSender.SendAsync(null);
 
 					sending.ShouldThrow<ArgumentNullException>();
+				}
+			}
+
+			public class WhenCancellingSend : GivenMultipleChannelsAndNoneAreOperational
+			{
+				[Unit]
+				public async Task ThenThrowsException()
+				{
+					var cts = new CancellationTokenSource();
+					_inoperativeChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+					_alternativeInoperativeChannel.Setup(x => x.SendAsync(_message, cts.Token)).Throws<OperationCanceledException>();
+
+					var sending = _messageSender.SendAsync(_message, cts.Token);
+					cts.Cancel();
+
+					try
+					{
+						await sending;
+					}
+					catch { }
+
+					sending.IsFaulted.Should().BeTrue();
 				}
 			}
 

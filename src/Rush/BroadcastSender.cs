@@ -39,7 +39,7 @@ namespace Rush
 			{
 				if (tasks.Result.All(sent => !sent))
 					throw new InvalidOperationException("There are no operational message channels.");
-			});
+			}, cancellationToken);
 		}
 
 		private async Task<bool> SendToChannel(T message, ISendingChannel<T> channel, CancellationToken cancellationToken)
@@ -52,7 +52,7 @@ namespace Rush
 				await channel.SendAsync(message, cancellationToken).ConfigureAwait(false);
 				return true;
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (ex.GetType() != typeof(OperationCanceledException))
 			{
 				_logger.LogWarning($"Operational channel faulted when sending message of type {typeof(T)}.", ex);
 				return await SendToChannel(message, channel, cancellationToken).ConfigureAwait(false);
