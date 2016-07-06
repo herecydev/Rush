@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
+using System.Threading.Tasks;
 using TestAttributes;
 
 namespace Rush.Tests
@@ -42,9 +44,21 @@ namespace Rush.Tests
 				{
 					_messageReceiver.Subscribe(_observer.Object);
 
+					_firstChannel.Verify(x => x.Subscribe(It.IsAny<IObserver<string>>()));
 					_firstChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
 					_secondChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
 					_thirdChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
+				}
+			}
+
+			public class WhenSubscribingWithNullSubscriber : GivenMultipleChannels
+			{
+				[Unit]
+				public void ThenThrowsException()
+				{
+					Action subscribing = () => _messageReceiver.Subscribe(null);
+
+					subscribing.ShouldThrow<ArgumentNullException>();
 				}
 			}
 

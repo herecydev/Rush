@@ -1,20 +1,22 @@
-﻿{
+{
   "packOptions": {
     "owners": [ "Dan Kirkham" ],
-    "tags": [ "Messaging", "Failover" ],
+    "tags": [ "Messaging", "Failover", "Azure", "Service Bus" ],
     "projectUrl": "https://github.com/herecydev/Rush",
     "licenseUrl": "https://raw.githubusercontent.com/herecydev/Rush/master/LICENSE"
   },
   "version": "0.0.0",
-  "description": "Rush Core Library",
+  "description": "Rush Azure implementation",
   "authors": [ "Dan Kirkham" ],
   "dependencies": {
+    "Jil": "2.14.3",
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc2-final",
-    "Microsoft.Extensions.Logging": "1.0.0-rc2-final",
-    "NETStandard.Library": "1.5.0-rc2-24027",
-    "System.Reactive": "3.0.0"
+    "Microsoft.Extensions.Options": "1.0.0-rc2-final",
+    "Rush": "0.0.0",
+    "System.Reactive": "3.0.0",
+    "WindowsAzure.ServiceBus": "3.2.4"
   },
   "frameworks": {
-    "netstandard1.1": { }
+    "net4.5": { }
   }
 }
