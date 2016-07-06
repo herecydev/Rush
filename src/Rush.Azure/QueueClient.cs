@@ -34,7 +34,6 @@ namespace Rush.Azure
 				}
 			});
 			_client = factory.CreateQueueClient(queueName);
-			_client.OnMessage(SendToObservers);
 		}
 
 		public Task SendAsync(BrokeredMessage brokeredMessage, CancellationToken cancellationToken)
@@ -43,14 +42,25 @@ namespace Rush.Azure
 			return _client.SendAsync(brokeredMessage);
 		}
 
-		public IDisposable Subscribe(IObserver<BrokeredMessage> observer) => _subject.Subscribe(observer);
+		public IDisposable Subscribe(IObserver<BrokeredMessage> observer)
+		{
+			var subscription = _subject.Subscribe(observer);
+			_client.OnMessage(SendToObservers);
+
+			return subscription;
+		}
 
 		private void SendToObservers(BrokeredMessage brokeredMessage)
 		{
-			//Todo exceptions
-			_subject.OnNext(brokeredMessage);
-
-			brokeredMessage.Complete();
+			try
+			{
+				_subject.OnNext(brokeredMessage);
+				brokeredMessage.Complete();
+			}
+			catch
+			{
+				brokeredMessage.Abandon();
+			}
 		}
 	}
 }

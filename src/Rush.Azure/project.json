@@ -14,7 +14,7 @@
     "Microsoft.Extensions.Options": "1.0.0-rc2-final",
     "Rush": "0.0.0",
     "System.Reactive": "3.0.0",
-    "WindowsAzure.ServiceBus": "3.2.4"
+    "WindowsAzure.ServiceBus": "3.3.1"
   },
   "frameworks": {
     "net4.5": { }

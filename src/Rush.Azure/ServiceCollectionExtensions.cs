@@ -9,7 +9,7 @@ namespace Rush.Azure
 			services.AddOptions();
 			services.AddTransient(typeof(ISendingChannel<>), typeof(QueueSendingChannel<>));
 			services.AddTransient<IBrokeredMessageSerializer, JsonBrokeredMessageSerializer>();
-			services.AddTransient<IQueueNamer, JsonBrokeredMessageConverter>();
+			services.AddTransient<IQueueNamer, FakeNamer>();
 			services.AddSingleton(typeof(IQueueClient<>), typeof(QueueClient<>));
 
 			return services;

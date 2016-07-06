@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 using TestAttributes;
 using Xunit;
 
-namespace Rush.InMemoryTests
+namespace Rush.AzureTests
 {
-	public class IntegrationTests
-	{
-		[Collection("InMemory collection")]
+    public class IntegrationTests
+    {
+		[Collection("Azure collection")]
 		public class GivenServiceProviderCanResolveSenderAndReceiver
 		{
-			[Collection("InMemory collection")]
+			[Collection("Azure collection")]
 			public class WhenSendingMessage
 			{
 				private readonly IServiceProvider _serviceProvider;
 
-				public WhenSendingMessage(InMemoryFixture fixture)
+				public WhenSendingMessage(AzureFixture fixture)
 				{
 					_serviceProvider = fixture.ServiceProvider;
 				}

@@ -44,10 +44,9 @@ namespace Rush.Tests
 				{
 					_messageReceiver.Subscribe(_observer.Object);
 
-					_firstChannel.Verify(x => x.Subscribe(It.IsAny<IObserver<string>>()));
-					_firstChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
-					_secondChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
-					_thirdChannel.Verify(x => x.Subscribe(_observer.Object), Times.Once);
+					_firstChannel.Verify(x => x.Subscribe(It.IsAny<IObserver<string>>()), Times.Once);
+					_secondChannel.Verify(x => x.Subscribe(It.IsAny<IObserver<string>>()), Times.Once);
+					_thirdChannel.Verify(x => x.Subscribe(It.IsAny<IObserver<string>>()), Times.Once);
 				}
 			}
 
