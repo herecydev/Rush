@@ -2,20 +2,24 @@
 using Microsoft.ServiceBus.Messaging;
 using System;
 using System.Reactive.Subjects;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Rush.Azure
 {
-	internal class QueueReceivingChannel<T> : IReceivingChannel<T>, IObserver<BrokeredMessage>, IDisposable
+	internal class QueueChannel<T> : IReceivingChannel<T>, ISendingChannel<T>, IObserver<BrokeredMessage>, IDisposable
 	{
 		private readonly IQueueClient<T> _queueClient;
 		private readonly IBrokeredMessageSerializer _brokeredMessageSerializer;
-		private readonly ILogger<QueueReceivingChannel<T>> _logger;
+		private readonly ILogger<QueueChannel<T>> _logger;
 		private readonly Subject<T> _subject = new Subject<T>();
 		private bool _subscribed = false;
 		private readonly object _subscriptionLock = new object();
 		private IDisposable _subcription;
 
-		public QueueReceivingChannel(IBrokeredMessageSerializer brokeredMessageSerializer, IQueueClient<T> queueClient, ILogger<QueueReceivingChannel<T>> logger)
+		public bool Operational { get; set; }
+
+		public QueueChannel(IBrokeredMessageSerializer brokeredMessageSerializer, IQueueClient<T> queueClient, ILogger<QueueChannel<T>> logger)
 		{
 			_queueClient = queueClient;
 			_brokeredMessageSerializer = brokeredMessageSerializer;
@@ -38,6 +42,12 @@ namespace Rush.Azure
 			return subscription;
 		}
 
+		public Task SendAsync(T message, CancellationToken cancellationToken)
+		{
+			var brokeredMessage = _brokeredMessageSerializer.Serialize(message);
+			return _queueClient.SendAsync(brokeredMessage, cancellationToken);
+		}
+
 		public void OnNext(BrokeredMessage brokeredMessage)
 		{
 			try
@@ -51,7 +61,11 @@ namespace Rush.Azure
 			}
 		}
 
-		public void OnError(Exception error) { }
+		public void OnError(Exception error)
+		{
+			_logger.LogError($"Queue client of type {nameof(T)} threw an error.", error);
+			Operational = false;
+		}
 
 		public void OnCompleted() => _subject.OnCompleted();
 
