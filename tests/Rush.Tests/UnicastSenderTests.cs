@@ -8,7 +8,7 @@ using TestAttributes;
 
 namespace Rush.Tests
 {
-	public class MessageSenderTests
+	public class UnicastSenderTests
 	{
 		private static Task CompletedTask = Task.FromResult(false);
 		private const string _message = "Hello world!";
@@ -18,8 +18,8 @@ namespace Rush.Tests
 			private readonly Mock<ISendingChannel<string>> _firstChannel;
 			private readonly Mock<ISendingChannel<string>> _secondChannel;
 			private readonly Mock<ISendingChannel<string>> _thirdChannel;
-			private readonly MessageSender<string> _messageSender;
-			private readonly Mock<ILogger<MessageSender<string>>> _logger;
+			private readonly UnicastSender<string> _messageSender;
+			private readonly Mock<ILogger<UnicastSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndAllAreOperational()
 			{
@@ -30,9 +30,9 @@ namespace Rush.Tests
 				_thirdChannel = new Mock<ISendingChannel<string>>();
 				_thirdChannel.Setup(x => x.Operational).Returns(true);
 
-				_logger = new Mock<ILogger<MessageSender<string>>>();
+				_logger = new Mock<ILogger<UnicastSender<string>>>();
 
-				_messageSender = new MessageSender<string>(new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object }, _logger.Object);
+				_messageSender = new UnicastSender<string>(new[] { _firstChannel.Object, _secondChannel.Object, _thirdChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSendingNullMessage : GivenMultipleChannelsAndAllAreOperational
@@ -61,8 +61,8 @@ namespace Rush.Tests
 				{
 					var count = 0;
 					_firstChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
-					_secondChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
-					_thirdChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Callback(() => count++).Returns(CompletedTask).Callback(() => count++);
+					_secondChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
+					_thirdChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => count++);
 
 					await _messageSender.SendAsync(_message);
 
@@ -70,11 +70,11 @@ namespace Rush.Tests
 				}
 			}
 
-			public class WhenSendingToSingleChannelWhichFaults : GivenMultipleChannelsAndAllAreOperational
+			public class WhenSingleChannelFaults : GivenMultipleChannelsAndAllAreOperational
 			{
 				private int _count;
 
-				public WhenSendingToSingleChannelWhichFaults()
+				public WhenSingleChannelFaults()
 				{
 					_count = 0;
 					_firstChannel.Setup(x => x.SendAsync(_message, CancellationToken.None)).Returns(CompletedTask).Callback(() => { _count++; _firstChannel.Setup(x => x.Operational).Returns(false); throw new Exception(); });
@@ -135,8 +135,8 @@ namespace Rush.Tests
 		{
 			private readonly Mock<ISendingChannel<string>> _inoperativeChannel;
 			private readonly Mock<ISendingChannel<string>> _operationalChannel;
-			private readonly MessageSender<string> _messageSender;
-			private readonly Mock<ILogger<MessageSender<string>>> _logger;
+			private readonly UnicastSender<string> _messageSender;
+			private readonly Mock<ILogger<UnicastSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndSomeAreOperational()
 			{
@@ -145,9 +145,9 @@ namespace Rush.Tests
 				_operationalChannel = new Mock<ISendingChannel<string>>();
 				_operationalChannel.Setup(x => x.Operational).Returns(true);
 
-				_logger = new Mock<ILogger<MessageSender<string>>>();
+				_logger = new Mock<ILogger<UnicastSender<string>>>();
 
-				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _operationalChannel.Object }, _logger.Object);
+				_messageSender = new UnicastSender<string>(new[] { _inoperativeChannel.Object, _operationalChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSendingNullMessage : GivenMultipleChannelsAndSomeAreOperational
@@ -207,8 +207,8 @@ namespace Rush.Tests
 		{
 			private readonly Mock<ISendingChannel<string>> _inoperativeChannel;
 			private readonly Mock<ISendingChannel<string>> _alternativeInoperativeChannel;
-			private readonly MessageSender<string> _messageSender;
-			private readonly Mock<ILogger<MessageSender<string>>> _logger;
+			private readonly UnicastSender<string> _messageSender;
+			private readonly Mock<ILogger<UnicastSender<string>>> _logger;
 
 			public GivenMultipleChannelsAndNoneAreOperational()
 			{
@@ -217,9 +217,9 @@ namespace Rush.Tests
 				_alternativeInoperativeChannel = new Mock<ISendingChannel<string>>();
 				_alternativeInoperativeChannel.Setup(x => x.Operational).Returns(false);
 
-				_logger = new Mock<ILogger<MessageSender<string>>>();
+				_logger = new Mock<ILogger<UnicastSender<string>>>();
 
-				_messageSender = new MessageSender<string>(new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object }, _logger.Object);
+				_messageSender = new UnicastSender<string>(new[] { _inoperativeChannel.Object, _alternativeInoperativeChannel.Object }, _logger.Object);
 			}
 
 			public class WhenSendingNullMessage : GivenMultipleChannelsAndNoneAreOperational
