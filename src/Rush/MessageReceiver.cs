@@ -1,52 +1,28 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 
 namespace Rush
 {
 	internal class MessageReceiver<T> : IReceivingStream<T>
 	{
-		private readonly IEnumerable<IReceivingChannel<T>> _channels;
+		private readonly IObservable<T> _channels;
 		private readonly ILogger<MessageReceiver<T>> _logger;
 
 		public MessageReceiver(IEnumerable<IReceivingChannel<T>> channels, ILogger<MessageReceiver<T>> logger)
 		{
-			_channels = channels;
+			_channels = channels.Merge().Retry();
 			_logger = logger;
 		}
 
 		public IDisposable Subscribe(IObserver<T> observer)
 		{
+			if (observer == null) throw new ArgumentNullException(nameof(observer));
+
 			_logger.LogInformation($"Creating subscription for type {typeof(T)}.");
 
-			var subscription = new Subscription();
-
-			foreach (var channel in _channels)
-				subscription.AddDisposable(channel.Subscribe(observer));
-
-			return subscription;
-		}
-
-		private sealed class Subscription : IDisposable
-		{
-			private ICollection<IDisposable> _disposables = new List<IDisposable>();
-			private bool _disposed;
-
-			public void AddDisposable(IDisposable disposable) => _disposables.Add(disposable);
-
-			public void Dispose()
-			{
-				lock (_disposables)
-				{
-					if (!_disposed)
-					{
-						foreach (var disposable in _disposables)
-							disposable?.Dispose();
-
-						_disposed = true;
-					}
-				}
-			}
+			return _channels.Subscribe(observer);
 		}
 	}
 }

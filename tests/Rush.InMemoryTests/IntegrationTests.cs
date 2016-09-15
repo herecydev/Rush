@@ -33,12 +33,14 @@ namespace Rush.InMemoryTests
 					observer.Setup(x => x.OnNext(It.IsAny<string>())).Callback(() => semaphore.Release());
 					var message = "Hello world!";
 
-					receiver.Subscribe(observer.Object);
-					await sender.SendAsync(message);
+					using (receiver.Subscribe(observer.Object))
+					{
+						await sender.SendAsync(message);
 
-					await semaphore.WaitAsync(TimeSpan.FromSeconds(10));
+						await semaphore.WaitAsync(TimeSpan.FromSeconds(10));
 
-					observer.Verify(x => x.OnNext(message), Times.Once);
+						observer.Verify(x => x.OnNext(message), Times.Once);
+					}
 				}
 			}
 		}
