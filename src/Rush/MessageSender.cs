@@ -39,7 +39,7 @@ namespace Rush
 			{
 				await operationalChannel.SendAsync(message, cancellationToken).ConfigureAwait(false);
 			}
-			catch (Exception ex)
+			catch (Exception ex) when (ex.GetType() != typeof(OperationCanceledException))
 			{
 				_logger.LogWarning($"Operational channel faulted when sending message of type {typeof(T)}.", ex);
 				await Send(message, cancellationToken).ConfigureAwait(false);
